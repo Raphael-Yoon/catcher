@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}대시보드 - Catcher{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2>
+                <i class="fas fa-chart-line text-primary me-2"></i>
+                통합 대시보드
+            </h2>
+            <p class="text-muted">내부회계관리제도 통합 현황</p>
+        </div>
+    </div>
+
+    <!-- 개발 중 메시지 -->
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-warning">
+                <i class="fas fa-tools me-2"></i>
+                <strong>개발 중:</strong> 대시보드 기능은 현재 개발 중입니다.
+            </div>
+        </div>
+    </div>
+
+    <!-- 예정 기능 -->
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-chart-pie text-primary me-2"></i>
+                        통제 현황
+                    </h5>
+                    <p class="text-muted small">전체 통제 평가 현황 및 진행률</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                        미비점 요약
+                    </h5>
+                    <p class="text-muted small">발견된 미비점 및 개선 현황</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-file-alt text-success me-2"></i>
+                        리포트 생성
+                    </h5>
+                    <p class="text-muted small">통합 보고서 및 Excel 내보내기</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

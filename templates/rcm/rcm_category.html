@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}{{ category }} RCM - Catcher{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>
+                    <i class="fas fa-{% if category == 'ELC' %}building{% elif category == 'TLC' %}exchange-alt{% else %}server{% endif %} me-2"></i>
+                    {{ category_name }}
+                </h1>
+                <div>
+                    {% if user_info and user_info.admin_flag == 'Y' %}
+                    <a href="{{ url_for('rcm.rcm_upload') }}" class="btn btn-primary me-2">
+                        <i class="fas fa-upload me-1"></i>RCM 업로드
+                    </a>
+                    {% endif %}
+                    <a href="{{ url_for('rcm.rcm_list') }}" class="btn btn-secondary">
+                        <i class="fas fa-list me-1"></i>전체 목록
+                    </a>
+                </div>
+            </div>
+            <hr>
+        </div>
+    </div>
+
+    <!-- 카테고리 설명 -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-{% if category == 'ELC' %}primary{% elif category == 'TLC' %}info{% else %}success{% endif %}">
+                <h5><i class="fas fa-info-circle me-2"></i>{{ category }} 란?</h5>
+                <p class="mb-0">
+                    {% if category == 'ELC' %}
+                    <strong>Entity Level Controls (전사적 통제):</strong> 조직 전체의 통제 환경과 관련된 통제 활동으로,
+                    경영진의 리더십, 조직 구조, 권한 및 책임, 인사 정책 등을 포함합니다.
+                    {% elif category == 'TLC' %}
+                    <strong>Transaction Level Controls (거래 수준 통제):</strong> 개별 거래의 정확성과 완전성을 보장하는 통제로,
+                    매출, 매입, 급여, 재고 등 각 거래 사이클에서 운영되는 통제 활동입니다.
+                    {% else %}
+                    <strong>IT General Controls (IT 일반 통제):</strong> IT 환경 전반에 걸친 통제로,
+                    시스템 접근 통제, 변경관리, 백업 및 복구, 운영 관리 등을 포함합니다.
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- RCM 목록 -->
+    {% include 'rcm/_rcm_category_table.html' %}
+</div>
+{% endblock %}

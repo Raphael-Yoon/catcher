@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+
+{% block title %}설계평가 - Catcher{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1><i class="fas fa-pen-ruler me-2"></i>설계평가</h1>
+                <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                    <i class="fas fa-home me-1"></i>홈으로
+                </a>
+            </div>
+            <hr>
+        </div>
+    </div>
+
+    <!-- 설계평가 소개 -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h5><i class="fas fa-info-circle me-2"></i>설계평가란?</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        <strong>설계평가(Design Effectiveness Testing)</strong>는 RCM에 기록된 통제활동이 현재 실제 업무와 일치하는지를 확인하고,
+                        실무적으로 효과적으로 운영되고 있는지를 평가하는 과정입니다.
+                    </p>
+                    <ul>
+                        <li><strong>목적:</strong> 문서상 통제와 실제 수행되는 통제의 일치성 확인 및 실무 효과성 검증</li>
+                        <li><strong>범위:</strong> 통제 절차의 현실 반영도, 실제 운영 상태, 위험 완화 효과 검토</li>
+                        <li><strong>결과:</strong> 실무와 문서 간 차이점 식별 및 통제 운영 개선방안 도출</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RCM 선택 -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-table me-2"></i>RCM 선택</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-4">설계평가를 수행할 RCM을 선택하세요.</p>
+
+                    <!-- 탭 네비게이션 -->
+                    <ul class="nav nav-tabs mb-3" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#elc-tab"
+                                    type="button" role="tab">
+                                ELC
+                                <span class="badge bg-primary ms-2">{{ rcms_by_category.ELC|length }}</span>
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tlc-tab"
+                                    type="button" role="tab">
+                                TLC
+                                <span class="badge bg-primary ms-2">{{ rcms_by_category.TLC|length }}</span>
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#itgc-tab"
+                                    type="button" role="tab">
+                                ITGC
+                                <span class="badge bg-primary ms-2">{{ rcms_by_category.ITGC|length }}</span>
+                            </button>
+                        </li>
+                    </ul>
+
+                    <!-- 탭 컨텐츠 -->
+                    <div class="tab-content">
+                        <!-- ELC RCMs -->
+                        <div class="tab-pane fade show active" id="elc-tab" role="tabpanel">
+                            {% if rcms_by_category.ELC %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>RCM명</th>
+                                            <th>회사명</th>
+                                            <th>업로드 일자</th>
+                                            <th>작업</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for rcm in rcms_by_category.ELC %}
+                                        <tr>
+                                            <td>{{ rcm.rcm_name }}</td>
+                                            <td>{{ rcm.company_name }}</td>
+                                            <td>{{ rcm.upload_date }}</td>
+                                            <td>
+                                                <form method="POST" action="{{ url_for('design.design_evaluation_rcm') }}" class="d-inline">
+                                                    <input type="hidden" name="rcm_id" value="{{ rcm.rcm_id }}">
+                                                    <button type="submit" class="btn btn-sm btn-primary">
+                                                        <i class="fas fa-arrow-right me-1"></i>평가 시작
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>ELC RCM이 없습니다.
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- TLC RCMs -->
+                        <div class="tab-pane fade" id="tlc-tab" role="tabpanel">
+                            {% if rcms_by_category.TLC %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>RCM명</th>
+                                            <th>회사명</th>
+                                            <th>업로드 일자</th>
+                                            <th>작업</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for rcm in rcms_by_category.TLC %}
+                                        <tr>
+                                            <td>{{ rcm.rcm_name }}</td>
+                                            <td>{{ rcm.company_name }}</td>
+                                            <td>{{ rcm.upload_date }}</td>
+                                            <td>
+                                                <form method="POST" action="{{ url_for('design.design_evaluation_rcm') }}" class="d-inline">
+                                                    <input type="hidden" name="rcm_id" value="{{ rcm.rcm_id }}">
+                                                    <button type="submit" class="btn btn-sm btn-primary">
+                                                        <i class="fas fa-arrow-right me-1"></i>평가 시작
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>TLC RCM이 없습니다.
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- ITGC RCMs -->
+                        <div class="tab-pane fade" id="itgc-tab" role="tabpanel">
+                            {% if rcms_by_category.ITGC %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>RCM명</th>
+                                            <th>회사명</th>
+                                            <th>업로드 일자</th>
+                                            <th>작업</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for rcm in rcms_by_category.ITGC %}
+                                        <tr>
+                                            <td>{{ rcm.rcm_name }}</td>
+                                            <td>{{ rcm.company_name }}</td>
+                                            <td>{{ rcm.upload_date }}</td>
+                                            <td>
+                                                <form method="POST" action="{{ url_for('design.design_evaluation_rcm') }}" class="d-inline">
+                                                    <input type="hidden" name="rcm_id" value="{{ rcm.rcm_id }}">
+                                                    <button type="submit" class="btn btn-sm btn-primary">
+                                                        <i class="fas fa-arrow-right me-1"></i>평가 시작
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>ITGC RCM이 없습니다.
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+
+{% block title %}{{ rcm_info.rcm_name }} - 설계평가 - Catcher{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1><i class="fas fa-pen-ruler me-2"></i>{{ rcm_info.rcm_name }} - 설계평가</h1>
+                <a href="{{ url_for('design.design_evaluation') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>RCM 목록
+                </a>
+            </div>
+            <hr>
+        </div>
+    </div>
+
+    <!-- RCM 정보 -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>RCM 정보</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>RCM명:</strong> {{ rcm_info.rcm_name }}</p>
+                            <p><strong>카테고리:</strong> <span class="badge bg-primary">{{ rcm_info.control_category }}</span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>업로드 일자:</strong> {{ rcm_info.upload_date }}</p>
+                            <p><strong>통제 수:</strong> {{ rcm_details|length }}개</p>
+                        </div>
+                    </div>
+                    {% if rcm_info.description %}
+                    <p class="mb-0"><strong>설명:</strong> {{ rcm_info.description }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 평가 세션 관리 -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-folder me-2"></i>평가 세션</h5>
+                </div>
+                <div class="card-body">
+                    <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#createSessionModal">
+                        <i class="fas fa-plus me-2"></i>새 평가 세션 생성
+                    </button>
+
+                    {% if evaluation_sessions %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>세션명</th>
+                                    <th>생성 일자</th>
+                                    <th>작업</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for session in evaluation_sessions %}
+                                <tr>
+                                    <td>{{ session.session_name }}</td>
+                                    <td>{{ session.created_date }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary" onclick="loadSession('{{ session.session_name }}')">
+                                            <i class="fas fa-edit me-1"></i>평가 계속
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>평가 세션이 없습니다. 새 세션을 생성하여 평가를 시작하세요.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 통제 목록 -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-list me-2"></i>통제 목록</h5>
+                </div>
+                <div class="card-body">
+                    {% if rcm_details %}
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>통제코드</th>
+                                    <th>통제명</th>
+                                    <th>통제설명</th>
+                                    <th>핵심통제</th>
+                                    <th>통제빈도</th>
+                                    <th>작업</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for control in rcm_details %}
+                                <tr>
+                                    <td>{{ control.control_code }}</td>
+                                    <td>{{ control.control_name }}</td>
+                                    <td>{{ control.control_description }}</td>
+                                    <td>
+                                        {% if control.key_control == 'Y' %}
+                                        <span class="badge bg-danger">핵심</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">일반</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ control.control_frequency or '-' }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary" onclick="evaluateControl('{{ control.control_code }}')">
+                                            <i class="fas fa-clipboard-check me-1"></i>평가
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>통제 데이터가 없습니다.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 세션 생성 모달 -->
+<div class="modal fade" id="createSessionModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-plus me-2"></i>새 평가 세션 생성</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="sessionName" class="form-label">세션명</label>
+                    <input type="text" class="form-control" id="sessionName" placeholder="예: 2024년 1분기 설계평가">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-primary" onclick="createSession()">생성</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const rcmId = {{ rcm_id }};
+
+function createSession() {
+    const sessionName = document.getElementById('sessionName').value;
+    if (!sessionName.trim()) {
+        alert('세션명을 입력하세요.');
+        return;
+    }
+
+    fetch('/design/api/create-session', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            rcm_id: rcmId,
+            session_name: sessionName
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert('오류: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('세션 생성 중 오류가 발생했습니다.');
+    });
+}
+
+function loadSession(sessionName) {
+    alert('평가 세션 로드 기능은 곧 구현됩니다: ' + sessionName);
+}
+
+function evaluateControl(controlCode) {
+    alert('통제 평가 기능은 곧 구현됩니다: ' + controlCode);
+}
+</script>
+{% endblock %}

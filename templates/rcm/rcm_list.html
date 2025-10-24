@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block title %}RCM 목록 - Catcher{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>
+                    <i class="fas fa-table me-2"></i>RCM 목록
+                </h1>
+                <div>
+                    {% if user_info and user_info.admin_flag == 'Y' %}
+                    <a href="{{ url_for('rcm.rcm_upload') }}" class="btn btn-primary me-2">
+                        <i class="fas fa-upload me-1"></i>RCM 업로드
+                    </a>
+                    {% endif %}
+                    <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                        <i class="fas fa-home me-1"></i>홈으로
+                    </a>
+                </div>
+            </div>
+            <hr>
+        </div>
+    </div>
+
+    <!-- 카테고리별 탭 -->
+    <ul class="nav nav-tabs mb-4" id="rcmTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button">
+                <i class="fas fa-th-large me-1"></i>전체 ({{ all_rcms|length }})
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="elc-tab" data-bs-toggle="tab" data-bs-target="#elc" type="button">
+                <i class="fas fa-building me-1"></i>ELC ({{ rcms_by_category.ELC|length }})
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tlc-tab" data-bs-toggle="tab" data-bs-target="#tlc" type="button">
+                <i class="fas fa-exchange-alt me-1"></i>TLC ({{ rcms_by_category.TLC|length }})
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="itgc-tab" data-bs-toggle="tab" data-bs-target="#itgc" type="button">
+                <i class="fas fa-server me-1"></i>ITGC ({{ rcms_by_category.ITGC|length }})
+            </button>
+        </li>
+    </ul>
+
+    <!-- 탭 컨텐츠 -->
+    <div class="tab-content" id="rcmTabContent">
+        <!-- 전체 RCM -->
+        <div class="tab-pane fade show active" id="all" role="tabpanel">
+            {% if all_rcms %}
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-list me-2"></i>전체 RCM 목록</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>카테고리</th>
+                                    <th>RCM명</th>
+                                    <th>회사명</th>
+                                    <th>설명</th>
+                                    <th>내 권한</th>
+                                    <th>업로드일</th>
+                                    <th>관리</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for rcm in all_rcms %}
+                                <tr>
+                                    <td>
+                                        <span class="badge bg-{% if rcm.control_category == 'ELC' %}primary{% elif rcm.control_category == 'TLC' %}info{% else %}success{% endif %}">
+                                            {{ rcm.control_category }}
+                                        </span>
+                                    </td>
+                                    <td><strong>{{ rcm.rcm_name }}</strong></td>
+                                    <td>{{ rcm.company_name }}</td>
+                                    <td>{{ rcm.description or '-' }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ 'danger' if rcm.permission_type == 'admin' else 'secondary' }}">
+                                            {{ '관리자' if rcm.permission_type == 'admin' else '읽기' }}
+                                        </span>
+                                    </td>
+                                    <td>{{ rcm.upload_date.split(' ')[0] if rcm.upload_date else '-' }}</td>
+                                    <td>
+                                        <a href="{{ url_for('rcm.rcm_view', rcm_id=rcm.rcm_id) }}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye me-1"></i>상세보기
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-info text-center">
+                <i class="fas fa-info-circle fa-2x mb-3"></i>
+                <p>접근 가능한 RCM이 없습니다.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- ELC RCM -->
+        <div class="tab-pane fade" id="elc" role="tabpanel">
+            {% set rcms = rcms_by_category.ELC %}
+            {% set category = 'ELC' %}
+            {% set category_name = 'Entity Level Controls' %}
+            {% include 'rcm/_rcm_category_table.html' %}
+        </div>
+
+        <!-- TLC RCM -->
+        <div class="tab-pane fade" id="tlc" role="tabpanel">
+            {% set rcms = rcms_by_category.TLC %}
+            {% set category = 'TLC' %}
+            {% set category_name = 'Transaction Level Controls' %}
+            {% include 'rcm/_rcm_category_table.html' %}
+        </div>
+
+        <!-- ITGC RCM -->
+        <div class="tab-pane fade" id="itgc" role="tabpanel">
+            {% set rcms = rcms_by_category.ITGC %}
+            {% set category = 'ITGC' %}
+            {% set category_name = 'IT General Controls' %}
+            {% include 'rcm/_rcm_category_table.html' %}
+        </div>
+    </div>
+
+    <!-- 카테고리 설명 -->
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-building text-primary me-2"></i>ELC</h5>
+                    <p class="card-text small">
+                        <strong>Entity Level Controls</strong><br>
+                        전사적 수준에서 운영되는 통제로, 조직 전체의 통제 환경과 관련된 통제 활동을 포함합니다.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-exchange-alt text-info me-2"></i>TLC</h5>
+                    <p class="card-text small">
+                        <strong>Transaction Level Controls</strong><br>
+                        거래 수준에서 운영되는 통제로, 개별 거래의 정확성과 완전성을 보장하는 통제 활동입니다.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-server text-success me-2"></i>ITGC</h5>
+                    <p class="card-text small">
+                        <strong>IT General Controls</strong><br>
+                        IT 환경 전반에 걸친 통제로, 시스템 접근, 변경관리, 백업/복구 등을 포함합니다.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

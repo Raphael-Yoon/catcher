@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}로그인 - Catcher{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white text-center">
+                    <h4 class="mb-0">
+                        <i class="fas fa-sign-in-alt me-2"></i>로그인
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    {% if error %}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle me-2"></i>{{ error }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endif %}
+
+                    {% if message %}
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle me-2"></i>{{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endif %}
+
+                    {% if not step or step != 'verify' %}
+                    <!-- 1단계: 이메일 입력 및 OTP 요청 -->
+                    <form method="POST" action="{{ url_for('login') }}{% if next %}?next={{ next }}{% endif %}">
+                        <input type="hidden" name="action" value="send_otp">
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label">
+                                <i class="fas fa-envelope me-1"></i>이메일
+                            </label>
+                            <input type="email" class="form-control" id="email" name="email" required
+                                   placeholder="등록된 이메일 주소를 입력하세요">
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane me-2"></i>인증 코드 발송
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- 관리자 로그인 (로컬호스트만) -->
+                    {% if remote_addr == '127.0.0.1' %}
+                    <div class="mt-4 pt-3 border-top">
+                        <form method="POST" action="{{ url_for('login') }}{% if next %}?next={{ next }}{% endif %}">
+                            <input type="hidden" name="action" value="admin_login">
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-shield-alt me-2"></i>관리자 로그인
+                                </button>
+                            </div>
+                        </form>
+                        <small class="text-muted d-block text-center mt-2">
+                            <i class="fas fa-info-circle me-1"></i>관리자 직접 로그인
+                        </small>
+                    </div>
+                    {% endif %}
+
+                    {% else %}
+                    <!-- 2단계: OTP 코드 입력 -->
+                    <div class="alert alert-info">
+                        <p class="mb-2">
+                            <strong>{{ email }}</strong>로 인증 코드를 발송했습니다.
+                        </p>
+                        <p class="mb-0">
+                            이메일을 확인하고 6자리 인증 코드를 입력해주세요.
+                        </p>
+                    </div>
+
+                    <form method="POST" action="{{ url_for('login') }}{% if next %}?next={{ next }}{% endif %}">
+                        <input type="hidden" name="action" value="verify_otp">
+
+                        <div class="mb-3">
+                            <label for="otp_code" class="form-label">
+                                <i class="fas fa-key me-1"></i>인증 코드
+                            </label>
+                            <input type="text" class="form-control text-center"
+                                   id="otp_code" name="otp_code"
+                                   maxlength="6" required
+                                   placeholder="000000"
+                                   style="font-size: 1.5rem; letter-spacing: 0.5rem;">
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-check me-2"></i>로그인
+                            </button>
+                            <a href="{{ url_for('login') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>처음으로
+                            </a>
+                        </div>
+                    </form>
+                    {% endif %}
+                </div>
+                <div class="card-footer text-center bg-light">
+                    <small class="text-muted">
+                        <a href="{{ url_for('index') }}" class="text-decoration-none">
+                            <i class="fas fa-home me-1"></i>메인으로 돌아가기
+                        </a>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

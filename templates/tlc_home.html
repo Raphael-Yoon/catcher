@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}TLC - Catcher{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2>
+                <i class="fas fa-exchange-alt text-warning me-2"></i>
+                TLC (Transaction Level Controls)
+            </h2>
+            <p class="text-muted">거래 수준 통제</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-warning">
+                <i class="fas fa-tools me-2"></i>
+                <strong>개발 예정:</strong> TLC 모듈은 현재 개발 계획 단계입니다.
+            </div>
+        </div>
+    </div>
+
+    <!-- 예정 기능 -->
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-dollar-sign fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">매출/매입</h5>
+                    <ul class="list-unstyled text-start small">
+                        <li><i class="fas fa-check text-success me-2"></i>수주 및 계약</li>
+                        <li><i class="fas fa-check text-success me-2"></i>출고 및 청구</li>
+                        <li><i class="fas fa-check text-success me-2"></i>대금 회수</li>
+                        <li><i class="fas fa-check text-success me-2"></i>구매 및 검수</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-boxes fa-3x text-info mb-3"></i>
+                    <h5 class="card-title">재고 관리</h5>
+                    <ul class="list-unstyled text-start small">
+                        <li><i class="fas fa-check text-info me-2"></i>입고 관리</li>
+                        <li><i class="fas fa-check text-info me-2"></i>재고 실사</li>
+                        <li><i class="fas fa-check text-info me-2"></i>재고 평가</li>
+                        <li><i class="fas fa-check text-info me-2"></i>폐기 처리</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-users fa-3x text-success mb-3"></i>
+                    <h5 class="card-title">급여</h5>
+                    <ul class="list-unstyled text-start small">
+                        <li><i class="fas fa-check text-success me-2"></i>인사 관리</li>
+                        <li><i class="fas fa-check text-success me-2"></i>근태 관리</li>
+                        <li><i class="fas fa-check text-success me-2"></i>급여 계산</li>
+                        <li><i class="fas fa-check text-success me-2"></i>급여 지급</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-building fa-3x text-warning mb-3"></i>
+                    <h5 class="card-title">자산 관리</h5>
+                    <ul class="list-unstyled text-start small">
+                        <li><i class="fas fa-check text-warning me-2"></i>자산 취득</li>
+                        <li><i class="fas fa-check text-warning me-2"></i>자산 실사</li>
+                        <li><i class="fas fa-check text-warning me-2"></i>감가상각</li>
+                        <li><i class="fas fa-check text-warning me-2"></i>자산 처분</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-file-invoice-dollar fa-3x text-danger mb-3"></i>
+                    <h5 class="card-title">재무보고</h5>
+                    <ul class="list-unstyled text-start small">
+                        <li><i class="fas fa-check text-danger me-2"></i>계정 마감</li>
+                        <li><i class="fas fa-check text-danger me-2"></i>분개 승인</li>
+                        <li><i class="fas fa-check text-danger me-2"></i>재무제표 작성</li>
+                        <li><i class="fas fa-check text-danger me-2"></i>공시 검토</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-chart-line fa-3x text-secondary mb-3"></i>
+                    <h5 class="card-title">기타</h5>
+                    <ul class="list-unstyled text-start small">
+                        <li><i class="fas fa-check text-secondary me-2"></i>자금 관리</li>
+                        <li><i class="fas fa-check text-secondary me-2"></i>투자 관리</li>
+                        <li><i class="fas fa-check text-secondary me-2"></i>세무 관리</li>
+                        <li><i class="fas fa-check text-secondary me-2"></i>법인카드 관리</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

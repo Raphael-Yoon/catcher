@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}ITGC - Catcher{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2>
+                <i class="fas fa-server text-info me-2"></i>
+                ITGC (IT General Controls)
+            </h2>
+            <p class="text-muted">정보시스템 일반 통제</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>안내:</strong> ITGC 모듈은 별도 포트(5001)에서 실행됩니다. 아래 버튼을 클릭하여 실행하세요.
+            </div>
+        </div>
+    </div>
+
+    <!-- ITGC 실행 안내 -->
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-lock fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">APD</h5>
+                    <p class="card-text small">Access to Programs and Data</p>
+                    <p class="text-muted small">프로그램 및 데이터 접근 통제</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-code fa-3x text-success mb-3"></i>
+                    <h5 class="card-title">PC</h5>
+                    <p class="card-text small">Program Changes</p>
+                    <p class="text-muted small">프로그램 변경 통제</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-cogs fa-3x text-warning mb-3"></i>
+                    <h5 class="card-title">CO</h5>
+                    <p class="card-text small">Computer Operations</p>
+                    <p class="text-muted small">전산 운영 통제</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            <a href="http://localhost:5001" target="_blank" class="btn btn-primary btn-lg">
+                <i class="fas fa-external-link-alt me-2"></i>
+                ITGC 모듈 열기 (새 창)
+            </a>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-terminal me-2"></i>
+                        ITGC 실행 방법
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <pre class="bg-dark text-light p-3 rounded"><code>cd sentinel/itgc
+python snowball.py</code></pre>
+                    <p class="mb-0 small text-muted">
+                        <i class="fas fa-info-circle me-1"></i>
+                        위 명령어를 터미널에서 실행하면 ITGC 모듈이 http://localhost:5001 에서 시작됩니다.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

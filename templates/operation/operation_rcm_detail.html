@@ -1,0 +1,302 @@
+{% extends "base.html" %}
+
+{% block title %}{{ rcm_info.rcm_name }} - 운영평가 - Catcher{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1><i class="fas fa-clipboard-check me-2"></i>{{ rcm_info.rcm_name }} - 운영평가</h1>
+                <a href="{{ url_for('operation.operation_evaluation') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>RCM 목록
+                </a>
+            </div>
+            <hr>
+        </div>
+    </div>
+
+    <!-- RCM 정보 -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>RCM 정보</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>RCM명:</strong> {{ rcm_info.rcm_name }}</p>
+                            <p><strong>카테고리:</strong> <span class="badge bg-success">{{ rcm_info.control_category }}</span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>업로드 일자:</strong> {{ rcm_info.upload_date }}</p>
+                            <p><strong>통제 수:</strong> {{ rcm_details|length }}개</p>
+                        </div>
+                    </div>
+                    {% if rcm_info.description %}
+                    <p class="mb-0"><strong>설명:</strong> {{ rcm_info.description }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 설계평가 세션 선택 -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-folder me-2"></i>설계평가 세션 선택</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">운영평가는 완료된 설계평가를 기반으로 수행됩니다. 설계평가 세션을 선택하세요.</p>
+
+                    {% if design_sessions %}
+                    <div class="mb-3">
+                        <label for="designSessionSelect" class="form-label">설계평가 세션</label>
+                        <select class="form-select" id="designSessionSelect" onchange="loadDesignSession()">
+                            <option value="">-- 세션 선택 --</option>
+                            {% for session in design_sessions %}
+                            <option value="{{ session.session_name }}">
+                                {{ session.session_name }} ({{ session.created_date }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        완료된 설계평가 세션이 없습니다. 먼저 설계평가를 완료해주세요.
+                        <a href="{{ url_for('design.design_evaluation') }}" class="btn btn-sm btn-primary ms-3">
+                            <i class="fas fa-pen-ruler me-1"></i>설계평가로 이동
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 통제 목록 및 운영평가 -->
+    <div class="row" id="controlListSection" style="display: none;">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-list me-2"></i>통제 목록 및 운영평가</h5>
+                </div>
+                <div class="card-body">
+                    {% if rcm_details %}
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>통제코드</th>
+                                    <th>통제명</th>
+                                    <th>통제설명</th>
+                                    <th>핵심통제</th>
+                                    <th>통제빈도</th>
+                                    <th>작업</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for control in rcm_details %}
+                                <tr>
+                                    <td>{{ control.control_code }}</td>
+                                    <td>{{ control.control_name }}</td>
+                                    <td>{{ control.control_description }}</td>
+                                    <td>
+                                        {% if control.key_control == 'Y' %}
+                                        <span class="badge bg-danger">핵심</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">일반</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ control.control_frequency or '-' }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-success" onclick="testControl('{{ control.control_code }}')">
+                                            <i class="fas fa-vial me-1"></i>테스트
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>통제 데이터가 없습니다.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 운영평가 테스트 모달 -->
+<div class="modal fade" id="operationTestModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="fas fa-vial me-2"></i>운영평가 테스트</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label"><strong>통제코드:</strong></label>
+                    <p id="modalControlCode" class="form-control-plaintext"></p>
+                </div>
+
+                <div class="mb-3">
+                    <label for="sampleSize" class="form-label">샘플 수 <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" id="sampleSize" min="1" placeholder="예: 25">
+                    <small class="text-muted">테스트한 샘플의 총 개수를 입력하세요.</small>
+                </div>
+
+                <div class="mb-3">
+                    <label for="exceptionCount" class="form-label">예외 건수 <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" id="exceptionCount" min="0" placeholder="예: 0">
+                    <small class="text-muted">발견된 예외 또는 오류의 개수를 입력하세요.</small>
+                </div>
+
+                <div class="mb-3">
+                    <label for="testResult" class="form-label">테스트 결과 <span class="text-danger">*</span></label>
+                    <select class="form-select" id="testResult">
+                        <option value="">-- 선택 --</option>
+                        <option value="EFFECTIVE">효과적(Effective)</option>
+                        <option value="DEFICIENT">미비(Deficient)</option>
+                        <option value="NOT_TESTED">미테스트(Not Tested)</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="testProcedure" class="form-label">테스트 절차</label>
+                    <textarea class="form-control" id="testProcedure" rows="3"
+                              placeholder="어떤 절차로 테스트를 수행했는지 기술하세요."></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label for="findings" class="form-label">발견사항 및 코멘트</label>
+                    <textarea class="form-control" id="findings" rows="4"
+                              placeholder="테스트 중 발견된 사항이나 특이사항을 기록하세요."></textarea>
+                </div>
+
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>운영평가 가이드:</strong>
+                    <ul class="mb-0 mt-2">
+                        <li>샘플 수는 통제 빈도와 위험도를 고려하여 결정합니다.</li>
+                        <li>예외 건수는 통제가 효과적으로 작동하지 않은 사례의 수입니다.</li>
+                        <li>예외가 발생한 경우 반드시 발견사항에 상세히 기록하세요.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-success" onclick="saveOperationTest()">
+                    <i class="fas fa-save me-1"></i>저장
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const rcmId = {{ rcm_id }};
+let currentControlCode = null;
+let currentDesignSession = null;
+
+function loadDesignSession() {
+    const sessionSelect = document.getElementById('designSessionSelect');
+    currentDesignSession = sessionSelect.value;
+
+    if (currentDesignSession) {
+        document.getElementById('controlListSection').style.display = 'block';
+        // Scroll to control list
+        document.getElementById('controlListSection').scrollIntoView({ behavior: 'smooth' });
+    } else {
+        document.getElementById('controlListSection').style.display = 'none';
+    }
+}
+
+function testControl(controlCode) {
+    if (!currentDesignSession) {
+        alert('먼저 설계평가 세션을 선택하세요.');
+        return;
+    }
+
+    currentControlCode = controlCode;
+    document.getElementById('modalControlCode').textContent = controlCode;
+
+    // Reset form
+    document.getElementById('sampleSize').value = '';
+    document.getElementById('exceptionCount').value = '';
+    document.getElementById('testResult').value = '';
+    document.getElementById('testProcedure').value = '';
+    document.getElementById('findings').value = '';
+
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('operationTestModal'));
+    modal.show();
+}
+
+function saveOperationTest() {
+    const sampleSize = document.getElementById('sampleSize').value;
+    const exceptionCount = document.getElementById('exceptionCount').value;
+    const testResult = document.getElementById('testResult').value;
+    const testProcedure = document.getElementById('testProcedure').value;
+    const findings = document.getElementById('findings').value;
+
+    // Validation
+    if (!sampleSize || !exceptionCount || !testResult) {
+        alert('필수 항목을 모두 입력하세요.');
+        return;
+    }
+
+    if (parseInt(exceptionCount) > parseInt(sampleSize)) {
+        alert('예외 건수는 샘플 수를 초과할 수 없습니다.');
+        return;
+    }
+
+    const evaluationData = {
+        sample_size: parseInt(sampleSize),
+        exception_count: parseInt(exceptionCount),
+        test_result: testResult,
+        test_procedure: testProcedure,
+        findings: findings
+    };
+
+    fetch('/operation/api/save', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            rcm_id: rcmId,
+            control_code: currentControlCode,
+            design_session: currentDesignSession,
+            evaluation_data: evaluationData
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            // Close modal
+            const modalElement = document.getElementById('operationTestModal');
+            const modal = bootstrap.Modal.getInstance(modalElement);
+            modal.hide();
+            // Optionally reload page or update table
+            location.reload();
+        } else {
+            alert('오류: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('저장 중 오류가 발생했습니다.');
+    });
+}
+</script>
+{% endblock %}
