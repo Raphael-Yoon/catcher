@@ -1,4 +1,37 @@
-# Sentinel 변경 이력
+# Catcher 변경 이력
+
+## 2025-10-25 - 파비콘 및 테스트 커버리지 개선
+
+### UI 개선
+- **파비콘 추가**
+  - index.html 및 base.html에 파비콘 추가
+  - catcher.png를 favicon으로 사용
+  - iOS/macOS용 apple-touch-icon 포함
+  - 브라우저 탭에 Catcher 아이콘 표시
+
+### 테스트 커버리지 개선
+- **테스트 코드 수정**
+  - conftest.py: department 컬럼 제거 (실제 DB 스키마와 일치)
+  - 테스트 fixture 스키마 정리
+
+- **새로운 테스트 추가**
+  - test_link2.py: 설계평가(Design Evaluation) 테스트 4개
+  - test_link3.py: 운영평가(Operation Evaluation) 테스트 4개
+
+- **테스트 결과**
+  - 총 45개 테스트 모두 통과 (0.44초)
+  - test_auth.py: 15개 (인증 및 권한)
+  - test_link1.py: 26개 (RCM 업로드)
+  - test_link2.py: 4개 (설계평가)
+  - test_link3.py: 4개 (운영평가)
+
+### GitHub 배포
+- Repository: https://github.com/Raphael-Yoon/catcher
+- master 브랜치: 안정 버전
+- developer 브랜치: 개발 버전
+- Branch protection 설정 권장 (master 직접 push 금지)
+
+---
 
 ## 2025-10-24 - RCM 업로드 기능 구현
 
