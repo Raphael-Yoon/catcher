@@ -70,7 +70,6 @@ def _create_basic_test_tables(db_path):
             user_email TEXT UNIQUE NOT NULL,
             user_name TEXT NOT NULL,
             company_name TEXT,
-            department TEXT,
             user_password TEXT,
             admin_flag TEXT DEFAULT 'N',
             created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -177,9 +176,9 @@ def test_user(app):
 
             # Create new user
             cursor = conn.execute('''
-                INSERT INTO sb_user (user_email, user_name, company_name, department, admin_flag)
-                VALUES (?, ?, ?, ?, ?)
-            ''', ('test@catcher.com', 'Test User', 'Test Company', 'IT', 'N'))
+                INSERT INTO sb_user (user_email, user_name, company_name, admin_flag)
+                VALUES (?, ?, ?, ?)
+            ''', ('test@catcher.com', 'Test User', 'Test Company', 'N'))
             user_id = cursor.lastrowid
             conn.commit()
 
@@ -188,7 +187,6 @@ def test_user(app):
                 'user_email': 'test@catcher.com',
                 'user_name': 'Test User',
                 'company_name': 'Test Company',
-                'department': 'IT',
                 'admin_flag': 'N'
             }
 
@@ -209,9 +207,9 @@ def admin_user(app):
 
             # Create new admin user
             cursor = conn.execute('''
-                INSERT INTO sb_user (user_email, user_name, company_name, department, admin_flag)
-                VALUES (?, ?, ?, ?, ?)
-            ''', ('admin@catcher.com', 'Admin User', 'Catcher Corp', 'Admin', 'Y'))
+                INSERT INTO sb_user (user_email, user_name, company_name, admin_flag)
+                VALUES (?, ?, ?, ?)
+            ''', ('admin@catcher.com', 'Admin User', 'Catcher Corp', 'Y'))
             user_id = cursor.lastrowid
             conn.commit()
 
@@ -220,7 +218,6 @@ def admin_user(app):
                 'user_email': 'admin@catcher.com',
                 'user_name': 'Admin User',
                 'company_name': 'Catcher Corp',
-                'department': 'Admin',
                 'admin_flag': 'Y'
             }
 
