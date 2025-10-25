@@ -99,7 +99,7 @@ class TestUserActivityLogging:
 
             with get_db() as conn:
                 conn.execute('''
-                    INSERT INTO sb_user_rcm (user_id, rcm_id, permission_type, granted_by)
+                    INSERT INTO ca_user_rcm (user_id, rcm_id, permission_type, granted_by)
                     VALUES (?, ?, ?, ?)
                 ''', (user_id, rcm_id, 'READ', 1))
                 conn.commit()
@@ -107,12 +107,12 @@ class TestUserActivityLogging:
         # Access RCM
         response = authenticated_client.get(f'/rcm/{rcm_id}/view')
 
-        # Check if logged (should be in sb_user_activity_log)
+        # Check if logged (should be in ca_user_activity_log)
         with app.app_context():
             from catcher_auth import get_db
             with get_db() as conn:
                 logs = conn.execute(
-                    'SELECT * FROM sb_user_activity_log WHERE action_type = ?',
+                    'SELECT * FROM ca_user_activity_log WHERE action_type = ?',
                     ('RCM_VIEW',)
                 ).fetchall()
                 # At least one log entry should exist
@@ -135,7 +135,7 @@ class TestRCMAccess:
             # Grant permission
             with get_db() as conn:
                 conn.execute('''
-                    INSERT INTO sb_user_rcm (user_id, rcm_id, permission_type, granted_by)
+                    INSERT INTO ca_user_rcm (user_id, rcm_id, permission_type, granted_by)
                     VALUES (?, ?, ?, ?)
                 ''', (user_id, rcm_id, 'READ', 1))
                 conn.commit()
@@ -193,7 +193,7 @@ class TestRCMList:
             # Grant permission only to test_rcm
             with get_db() as conn:
                 conn.execute('''
-                    INSERT INTO sb_user_rcm (user_id, rcm_id, permission_type, granted_by)
+                    INSERT INTO ca_user_rcm (user_id, rcm_id, permission_type, granted_by)
                     VALUES (?, ?, ?, ?)
                 ''', (user_id, test_rcm['rcm_id'], 'READ', 1))
                 conn.commit()

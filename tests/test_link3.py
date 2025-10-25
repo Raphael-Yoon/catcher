@@ -33,7 +33,7 @@ class TestOperationEvaluationList:
             # Grant permission
             with get_db() as conn:
                 conn.execute('''
-                    INSERT INTO sb_user_rcm (user_id, rcm_id, permission_type, granted_by)
+                    INSERT INTO ca_user_rcm (user_id, rcm_id, permission_type, granted_by)
                     VALUES (?, ?, ?, ?)
                 ''', (user_id, test_rcm['rcm_id'], 'READ', 1))
                 conn.commit()

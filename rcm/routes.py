@@ -129,7 +129,7 @@ def rcm_upload():
     db = get_db()
     users = db.execute('''
         SELECT user_id, user_name, user_email, company_name
-        FROM sb_user
+        FROM ca_user
         WHERE effective_end_date IS NULL OR effective_end_date > CURRENT_TIMESTAMP
         ORDER BY company_name, user_name
     ''').fetchall()
@@ -377,7 +377,7 @@ def rcm_delete(rcm_id):
 
     try:
         db = get_db()
-        db.execute('UPDATE sb_rcm SET is_active = ? WHERE rcm_id = ?', ('N', rcm_id))
+        db.execute('UPDATE ca_rcm SET is_active = ? WHERE rcm_id = ?', ('N', rcm_id))
         db.commit()
 
         log_user_activity(user_info, 'RCM_DELETE',

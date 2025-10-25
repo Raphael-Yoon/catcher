@@ -6,6 +6,9 @@
 - 테스트 추가: test_link2.py (설계평가), test_link3.py (운영평가)
 - 테스트 통과: 45개 모두 통과
 - GitHub 배포: https://github.com/Raphael-Yoon/catcher (master, developer 브랜치)
+- 데이터베이스 테이블 접두사 변경: sb_ → ca_ (18개 테이블)
+- Python 코드 업데이트: 14개 파일에서 116개 참조 변경
+- 백업 생성: catcher.db.backup_before_rename
 
 ## 2025-10-24
 - 시스템 이름 변경: Sentinel → Catcher (호밀밭의 파수꾼)

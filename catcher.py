@@ -90,7 +90,7 @@ def login():
         if client_ip == '127.0.0.1':
             with get_db() as conn:
                 user = conn.execute(
-                    'SELECT * FROM sb_user WHERE admin_flag = ? AND (effective_end_date IS NULL OR effective_end_date > CURRENT_TIMESTAMP)',
+                    'SELECT * FROM ca_user WHERE admin_flag = ? AND (effective_end_date IS NULL OR effective_end_date > CURRENT_TIMESTAMP)',
                     ('Y',)
                 ).fetchone()
 

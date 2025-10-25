@@ -63,14 +63,14 @@ def authenticate_user(email, password):
     hashed_password = hash_password(password)
     user = db.execute('''
         SELECT user_id, user_name, user_email, company_name, department, admin_flag
-        FROM sb_user
+        FROM ca_user
         WHERE user_email = ? AND user_password = ?
         AND (effective_end_date IS NULL OR effective_end_date > CURRENT_TIMESTAMP)
     ''', (email, hashed_password)).fetchone()
 
     if user:
         # 마지막 로그인 시간 업데이트
-        db.execute('UPDATE sb_user SET last_login = CURRENT_TIMESTAMP WHERE user_id = ?',
+        db.execute('UPDATE ca_user SET last_login = CURRENT_TIMESTAMP WHERE user_id = ?',
                   (user['user_id'],))
         db.commit()
         return dict(user)
@@ -83,7 +83,7 @@ def create_user(user_name, user_email, password, company_name, department='', ad
 
     try:
         cursor = db.execute('''
-            INSERT INTO sb_user (user_name, user_email, user_password, company_name, department, admin_flag)
+            INSERT INTO ca_user (user_name, user_email, user_password, company_name, department, admin_flag)
             VALUES (?, ?, ?, ?, ?, ?)
         ''', (user_name, user_email, hashed_password, company_name, department, admin_flag))
         db.commit()
@@ -95,7 +95,7 @@ def create_rcm(rcm_name, control_category, description, upload_user_id, original
     """RCM 생성 (ELC/TLC/ITGC 구분)"""
     db = get_db()
     cursor = db.execute('''
-        INSERT INTO sb_rcm (rcm_name, control_category, description, upload_user_id, original_filename)
+        INSERT INTO ca_rcm (rcm_name, control_category, description, upload_user_id, original_filename)
         VALUES (?, ?, ?, ?, ?)
     ''', (rcm_name, control_category, description, upload_user_id, original_filename))
     db.commit()
@@ -106,7 +106,7 @@ def get_user_rcms(user_id, control_category=None):
     db = get_db()
 
     # 먼저 사용자가 관리자인지 확인
-    user = db.execute('SELECT admin_flag FROM sb_user WHERE user_id = ?', (user_id,)).fetchone()
+    user = db.execute('SELECT admin_flag FROM ca_user WHERE user_id = ?', (user_id,)).fetchone()
     is_admin = user and user['admin_flag'] == 'Y'
 
     if is_admin:
@@ -115,8 +115,8 @@ def get_user_rcms(user_id, control_category=None):
             rcms = db.execute('''
                 SELECT r.rcm_id, r.rcm_name, r.control_category, r.description, r.upload_date,
                        r.completion_date, 'admin' as permission_type, u.company_name
-                FROM sb_rcm r
-                INNER JOIN sb_user u ON r.upload_user_id = u.user_id
+                FROM ca_rcm r
+                INNER JOIN ca_user u ON r.upload_user_id = u.user_id
                 WHERE r.is_active = 'Y' AND r.control_category = ?
                 ORDER BY r.control_category, r.upload_date DESC
             ''', (control_category,)).fetchall()
@@ -124,8 +124,8 @@ def get_user_rcms(user_id, control_category=None):
             rcms = db.execute('''
                 SELECT r.rcm_id, r.rcm_name, r.control_category, r.description, r.upload_date,
                        r.completion_date, 'admin' as permission_type, u.company_name
-                FROM sb_rcm r
-                INNER JOIN sb_user u ON r.upload_user_id = u.user_id
+                FROM ca_rcm r
+                INNER JOIN ca_user u ON r.upload_user_id = u.user_id
                 WHERE r.is_active = 'Y'
                 ORDER BY r.control_category, r.upload_date DESC
             ''').fetchall()
@@ -135,9 +135,9 @@ def get_user_rcms(user_id, control_category=None):
             rcms = db.execute('''
                 SELECT r.rcm_id, r.rcm_name, r.control_category, r.description, r.upload_date,
                        r.completion_date, ur.permission_type, u.company_name
-                FROM sb_rcm r
-                INNER JOIN sb_user_rcm ur ON r.rcm_id = ur.rcm_id
-                INNER JOIN sb_user u ON r.upload_user_id = u.user_id
+                FROM ca_rcm r
+                INNER JOIN ca_user_rcm ur ON r.rcm_id = ur.rcm_id
+                INNER JOIN ca_user u ON r.upload_user_id = u.user_id
                 WHERE ur.user_id = ? AND ur.is_active = 'Y' AND r.is_active = 'Y'
                 AND r.control_category = ?
                 ORDER BY r.control_category, r.upload_date DESC
@@ -146,9 +146,9 @@ def get_user_rcms(user_id, control_category=None):
             rcms = db.execute('''
                 SELECT r.rcm_id, r.rcm_name, r.control_category, r.description, r.upload_date,
                        r.completion_date, ur.permission_type, u.company_name
-                FROM sb_rcm r
-                INNER JOIN sb_user_rcm ur ON r.rcm_id = ur.rcm_id
-                INNER JOIN sb_user u ON r.upload_user_id = u.user_id
+                FROM ca_rcm r
+                INNER JOIN ca_user_rcm ur ON r.rcm_id = ur.rcm_id
+                INNER JOIN ca_user u ON r.upload_user_id = u.user_id
                 WHERE ur.user_id = ? AND ur.is_active = 'Y' AND r.is_active = 'Y'
                 ORDER BY r.control_category, r.upload_date DESC
             ''', (user_id,)).fetchall()
@@ -160,13 +160,13 @@ def has_rcm_access(user_id, rcm_id):
     db = get_db()
 
     # 먼저 관리자인지 확인
-    user = db.execute('SELECT admin_flag FROM sb_user WHERE user_id = ?', (user_id,)).fetchone()
+    user = db.execute('SELECT admin_flag FROM ca_user WHERE user_id = ?', (user_id,)).fetchone()
     if user and user['admin_flag'] == 'Y':
         return True
 
     # 일반 사용자는 명시적 권한 확인
     access = db.execute('''
-        SELECT mapping_id FROM sb_user_rcm
+        SELECT mapping_id FROM ca_user_rcm
         WHERE user_id = ? AND rcm_id = ? AND is_active = 'Y'
     ''', (user_id, rcm_id)).fetchone()
 
@@ -177,7 +177,7 @@ def grant_rcm_access(user_id, rcm_id, granted_by, permission_type='READ'):
     db = get_db()
     try:
         db.execute('''
-            INSERT INTO sb_user_rcm (user_id, rcm_id, permission_type, granted_by)
+            INSERT INTO ca_user_rcm (user_id, rcm_id, permission_type, granted_by)
             VALUES (?, ?, ?, ?)
         ''', (user_id, rcm_id, permission_type, granted_by))
         db.commit()
@@ -185,7 +185,7 @@ def grant_rcm_access(user_id, rcm_id, granted_by, permission_type='READ'):
     except sqlite3.IntegrityError:
         # 이미 권한이 있는 경우 업데이트
         db.execute('''
-            UPDATE sb_user_rcm
+            UPDATE ca_user_rcm
             SET permission_type = ?, is_active = 'Y', granted_date = CURRENT_TIMESTAMP, granted_by = ?
             WHERE user_id = ? AND rcm_id = ?
         ''', (permission_type, granted_by, user_id, rcm_id))
@@ -196,7 +196,7 @@ def get_rcm_details(rcm_id):
     """RCM 상세 데이터 조회"""
     db = get_db()
     details = db.execute('''
-        SELECT * FROM sb_rcm_detail
+        SELECT * FROM ca_rcm_detail
         WHERE rcm_id = ?
         ORDER BY control_code
     ''', (rcm_id,)).fetchall()
@@ -207,8 +207,8 @@ def get_rcm_info(rcm_id):
     db = get_db()
     rcm = db.execute('''
         SELECT r.*, u.user_name as uploader_name, u.company_name
-        FROM sb_rcm r
-        LEFT JOIN sb_user u ON r.upload_user_id = u.user_id
+        FROM ca_rcm r
+        LEFT JOIN ca_user u ON r.upload_user_id = u.user_id
         WHERE r.rcm_id = ?
     ''', (rcm_id,)).fetchone()
     return dict(rcm) if rcm else None
@@ -220,7 +220,7 @@ def save_rcm_details(rcm_id, controls_data):
     for control in controls_data:
         try:
             db.execute('''
-                INSERT INTO sb_rcm_detail (
+                INSERT INTO ca_rcm_detail (
                     rcm_id, control_code, control_name, control_description,
                     key_control, control_frequency, control_type, control_nature,
                     population, population_completeness_check, population_count,
@@ -243,7 +243,7 @@ def save_rcm_details(rcm_id, controls_data):
         except sqlite3.IntegrityError:
             # 중복된 control_code는 업데이트
             db.execute('''
-                UPDATE sb_rcm_detail SET
+                UPDATE ca_rcm_detail SET
                     control_name = ?, control_description = ?,
                     key_control = ?, control_frequency = ?, control_type = ?, control_nature = ?,
                     population = ?, population_completeness_check = ?, population_count = ?,
@@ -273,7 +273,7 @@ def log_user_activity(user_info, activity_type, description, url, ip_address, us
 
     db = get_db()
     db.execute('''
-        INSERT INTO sb_user_activity_log (
+        INSERT INTO ca_user_activity_log (
             user_id, user_email, user_name, action_type, page_name, url_path,
             ip_address, user_agent, additional_info
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)

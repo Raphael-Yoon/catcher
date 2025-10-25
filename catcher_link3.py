@@ -167,7 +167,7 @@ def get_design_sessions(rcm_id):
             SELECT DISTINCT evaluation_session as session_name,
                    start_date as created_date,
                    evaluation_status
-            FROM sb_design_evaluation_header
+            FROM ca_design_evaluation_header
             WHERE rcm_id = ? AND evaluation_status = 'COMPLETED'
             ORDER BY start_date DESC
         ''', (rcm_id,)).fetchall()
@@ -180,7 +180,7 @@ def save_operation_evaluation_data(rcm_id, control_code, user_id, design_session
     with get_db() as conn:
         # 설계평가 헤더 ID 조회
         design_header = conn.execute('''
-            SELECT header_id FROM sb_design_evaluation_header
+            SELECT header_id FROM ca_design_evaluation_header
             WHERE rcm_id = ? AND evaluation_session = ?
         ''', (rcm_id, design_session)).fetchone()
 
@@ -191,14 +191,14 @@ def save_operation_evaluation_data(rcm_id, control_code, user_id, design_session
 
         # 운영평가 헤더 조회 또는 생성
         operation_header = conn.execute('''
-            SELECT header_id FROM sb_operation_evaluation_header
+            SELECT header_id FROM ca_operation_evaluation_header
             WHERE design_header_id = ? AND user_id = ?
         ''', (design_header_id, user_id)).fetchone()
 
         if not operation_header:
             # 헤더 생성
             cursor = conn.execute('''
-                INSERT INTO sb_operation_evaluation_header
+                INSERT INTO ca_operation_evaluation_header
                 (rcm_id, design_header_id, user_id, evaluation_status)
                 VALUES (?, ?, ?, 'IN_PROGRESS')
             ''', (rcm_id, design_header_id, user_id))
@@ -208,14 +208,14 @@ def save_operation_evaluation_data(rcm_id, control_code, user_id, design_session
 
         # 라인 데이터 저장
         existing = conn.execute('''
-            SELECT line_id FROM sb_operation_evaluation_line
+            SELECT line_id FROM ca_operation_evaluation_line
             WHERE header_id = ? AND control_code = ?
         ''', (operation_header_id, control_code)).fetchone()
 
         if existing:
             # 업데이트
             conn.execute('''
-                UPDATE sb_operation_evaluation_line
+                UPDATE ca_operation_evaluation_line
                 SET sample_size = ?,
                     exception_count = ?,
                     test_result = ?,
@@ -235,7 +235,7 @@ def save_operation_evaluation_data(rcm_id, control_code, user_id, design_session
         else:
             # 신규 삽입
             conn.execute('''
-                INSERT INTO sb_operation_evaluation_line
+                INSERT INTO ca_operation_evaluation_line
                 (header_id, control_code, sample_size, exception_count,
                  test_result, test_procedure, findings, evaluation_date)
                 VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)

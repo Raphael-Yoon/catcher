@@ -179,7 +179,7 @@ class TestIntegratedUpload:
         with app.app_context():
             with get_db() as conn:
                 rcms = conn.execute(
-                    'SELECT rcm_name, control_category FROM sb_rcm WHERE rcm_name LIKE ?',
+                    'SELECT rcm_name, control_category FROM ca_rcm WHERE rcm_name LIKE ?',
                     ('2024년 재무보고%',)
                 ).fetchall()
 
@@ -219,21 +219,21 @@ class TestIntegratedUpload:
             with get_db() as conn:
                 # ELC should have 2 controls
                 elc_controls = conn.execute(
-                    'SELECT * FROM sb_rcm_detail WHERE rcm_id = ?',
+                    'SELECT * FROM ca_rcm_detail WHERE rcm_id = ?',
                     (rcm_ids['ELC'],)
                 ).fetchall()
                 assert len(elc_controls) == 2
 
                 # TLC should have 2 controls
                 tlc_controls = conn.execute(
-                    'SELECT * FROM sb_rcm_detail WHERE rcm_id = ?',
+                    'SELECT * FROM ca_rcm_detail WHERE rcm_id = ?',
                     (rcm_ids['TLC'],)
                 ).fetchall()
                 assert len(tlc_controls) == 2
 
                 # ITGC should have 2 controls
                 itgc_controls = conn.execute(
-                    'SELECT * FROM sb_rcm_detail WHERE rcm_id = ?',
+                    'SELECT * FROM ca_rcm_detail WHERE rcm_id = ?',
                     (rcm_ids['ITGC'],)
                 ).fetchall()
                 assert len(itgc_controls) == 2
@@ -446,7 +446,7 @@ class TestUserPermissions:
         with app.app_context():
             with get_db() as conn:
                 permission = conn.execute(
-                    'SELECT * FROM sb_user_rcm WHERE user_id = ? AND rcm_id = ?',
+                    'SELECT * FROM ca_user_rcm WHERE user_id = ? AND rcm_id = ?',
                     (test_user['user_id'], rcm_id)
                 ).fetchone()
 

@@ -244,7 +244,7 @@ def get_evaluation_sessions(rcm_id, user_id):
     """평가 세션 목록 조회"""
     with get_db() as conn:
         # 관리자인지 확인
-        user = conn.execute('SELECT admin_flag FROM sb_user WHERE user_id = ?', (user_id,)).fetchone()
+        user = conn.execute('SELECT admin_flag FROM ca_user WHERE user_id = ?', (user_id,)).fetchone()
         is_admin = user and user['admin_flag'] == 'Y'
 
         if is_admin:
@@ -253,7 +253,7 @@ def get_evaluation_sessions(rcm_id, user_id):
                 SELECT header_id, evaluation_session as session_name,
                        evaluation_status, start_date as created_date,
                        total_controls, evaluated_controls, progress_percentage
-                FROM sb_design_evaluation_header
+                FROM ca_design_evaluation_header
                 WHERE rcm_id = ?
                 ORDER BY start_date DESC
             ''', (rcm_id,)).fetchall()
@@ -263,7 +263,7 @@ def get_evaluation_sessions(rcm_id, user_id):
                 SELECT header_id, evaluation_session as session_name,
                        evaluation_status, start_date as created_date,
                        total_controls, evaluated_controls, progress_percentage
-                FROM sb_design_evaluation_header
+                FROM ca_design_evaluation_header
                 WHERE rcm_id = ? AND user_id = ?
                 ORDER BY start_date DESC
             ''', (rcm_id, user_id)).fetchall()
@@ -276,14 +276,14 @@ def save_design_evaluation_data(rcm_id, control_code, user_id, session_name, eva
     with get_db() as conn:
         # 헤더 ID 조회 또는 생성
         header = conn.execute('''
-            SELECT header_id FROM sb_design_evaluation_header
+            SELECT header_id FROM ca_design_evaluation_header
             WHERE rcm_id = ? AND user_id = ? AND evaluation_session = ?
         ''', (rcm_id, user_id, session_name)).fetchone()
 
         if not header:
             # 헤더가 없으면 생성
             cursor = conn.execute('''
-                INSERT INTO sb_design_evaluation_header
+                INSERT INTO ca_design_evaluation_header
                 (rcm_id, user_id, evaluation_session, evaluation_status)
                 VALUES (?, ?, ?, 'IN_PROGRESS')
             ''', (rcm_id, user_id, session_name))
@@ -293,14 +293,14 @@ def save_design_evaluation_data(rcm_id, control_code, user_id, session_name, eva
 
         # 라인 데이터 저장
         existing = conn.execute('''
-            SELECT line_id FROM sb_design_evaluation_line
+            SELECT line_id FROM ca_design_evaluation_line
             WHERE header_id = ? AND control_code = ?
         ''', (header_id, control_code)).fetchone()
 
         if existing:
             # 업데이트
             conn.execute('''
-                UPDATE sb_design_evaluation_line
+                UPDATE ca_design_evaluation_line
                 SET description_adequacy = ?,
                     improvement_suggestion = ?,
                     overall_effectiveness = ?,
@@ -320,7 +320,7 @@ def save_design_evaluation_data(rcm_id, control_code, user_id, session_name, eva
         else:
             # 신규 삽입
             conn.execute('''
-                INSERT INTO sb_design_evaluation_line
+                INSERT INTO ca_design_evaluation_line
                 (header_id, control_code, description_adequacy, improvement_suggestion,
                  overall_effectiveness, evaluation_rationale, recommended_actions, evaluation_date)
                 VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
@@ -335,7 +335,7 @@ def save_design_evaluation_data(rcm_id, control_code, user_id, session_name, eva
 
         # 헤더의 진행률 업데이트
         conn.execute('''
-            UPDATE sb_design_evaluation_header
+            UPDATE ca_design_evaluation_header
             SET last_updated = CURRENT_TIMESTAMP
             WHERE header_id = ?
         ''', (header_id,))
@@ -348,12 +348,12 @@ def create_design_evaluation_session(rcm_id, user_id, session_name):
     with get_db() as conn:
         # RCM의 총 통제 수 조회
         total_controls = conn.execute('''
-            SELECT COUNT(*) as cnt FROM sb_rcm_detail WHERE rcm_id = ?
+            SELECT COUNT(*) as cnt FROM ca_rcm_detail WHERE rcm_id = ?
         ''', (rcm_id,)).fetchone()['cnt']
 
         # 세션 헤더 생성
         cursor = conn.execute('''
-            INSERT INTO sb_design_evaluation_header
+            INSERT INTO ca_design_evaluation_header
             (rcm_id, user_id, evaluation_session, evaluation_status, total_controls)
             VALUES (?, ?, ?, 'IN_PROGRESS', ?)
         ''', (rcm_id, user_id, session_name, total_controls))

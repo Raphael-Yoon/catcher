@@ -65,7 +65,7 @@ def _create_basic_test_tables(db_path):
 
     # Create essential tables for testing (based on snowball schema)
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS sb_user (
+        CREATE TABLE IF NOT EXISTS ca_user (
             user_id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_email TEXT UNIQUE NOT NULL,
             user_name TEXT NOT NULL,
@@ -79,7 +79,7 @@ def _create_basic_test_tables(db_path):
     ''')
 
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS sb_rcm (
+        CREATE TABLE IF NOT EXISTS ca_rcm (
             rcm_id INTEGER PRIMARY KEY AUTOINCREMENT,
             rcm_name TEXT NOT NULL,
             control_category TEXT NOT NULL,
@@ -89,12 +89,12 @@ def _create_basic_test_tables(db_path):
             completion_date TIMESTAMP,
             original_filename TEXT,
             is_active TEXT DEFAULT 'Y',
-            FOREIGN KEY (upload_user_id) REFERENCES sb_user(user_id)
+            FOREIGN KEY (upload_user_id) REFERENCES ca_user(user_id)
         )
     ''')
 
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS sb_rcm_detail (
+        CREATE TABLE IF NOT EXISTS ca_rcm_detail (
             detail_id INTEGER PRIMARY KEY AUTOINCREMENT,
             rcm_id INTEGER NOT NULL,
             control_code TEXT NOT NULL,
@@ -108,13 +108,13 @@ def _create_basic_test_tables(db_path):
             population_completeness_check TEXT,
             population_count TEXT,
             test_procedure TEXT,
-            FOREIGN KEY (rcm_id) REFERENCES sb_rcm(rcm_id),
+            FOREIGN KEY (rcm_id) REFERENCES ca_rcm(rcm_id),
             UNIQUE(rcm_id, control_code)
         )
     ''')
 
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS sb_user_rcm (
+        CREATE TABLE IF NOT EXISTS ca_user_rcm (
             mapping_id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER NOT NULL,
             rcm_id INTEGER NOT NULL,
@@ -122,14 +122,14 @@ def _create_basic_test_tables(db_path):
             granted_by INTEGER,
             granted_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             is_active TEXT DEFAULT 'Y',
-            FOREIGN KEY (user_id) REFERENCES sb_user(user_id),
-            FOREIGN KEY (rcm_id) REFERENCES sb_rcm(rcm_id),
+            FOREIGN KEY (user_id) REFERENCES ca_user(user_id),
+            FOREIGN KEY (rcm_id) REFERENCES ca_rcm(rcm_id),
             UNIQUE(user_id, rcm_id)
         )
     ''')
 
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS sb_user_activity_log (
+        CREATE TABLE IF NOT EXISTS ca_user_activity_log (
             log_id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER,
             user_email TEXT,
@@ -167,7 +167,7 @@ def test_user(app):
         with get_db() as conn:
             # Check if user already exists
             existing = conn.execute(
-                'SELECT * FROM sb_user WHERE user_email = ?',
+                'SELECT * FROM ca_user WHERE user_email = ?',
                 ('test@catcher.com',)
             ).fetchone()
 
@@ -176,7 +176,7 @@ def test_user(app):
 
             # Create new user
             cursor = conn.execute('''
-                INSERT INTO sb_user (user_email, user_name, company_name, admin_flag)
+                INSERT INTO ca_user (user_email, user_name, company_name, admin_flag)
                 VALUES (?, ?, ?, ?)
             ''', ('test@catcher.com', 'Test User', 'Test Company', 'N'))
             user_id = cursor.lastrowid
@@ -198,7 +198,7 @@ def admin_user(app):
         with get_db() as conn:
             # Check if user already exists
             existing = conn.execute(
-                'SELECT * FROM sb_user WHERE user_email = ?',
+                'SELECT * FROM ca_user WHERE user_email = ?',
                 ('admin@catcher.com',)
             ).fetchone()
 
@@ -207,7 +207,7 @@ def admin_user(app):
 
             # Create new admin user
             cursor = conn.execute('''
-                INSERT INTO sb_user (user_email, user_name, company_name, admin_flag)
+                INSERT INTO ca_user (user_email, user_name, company_name, admin_flag)
                 VALUES (?, ?, ?, ?)
             ''', ('admin@catcher.com', 'Admin User', 'Catcher Corp', 'Y'))
             user_id = cursor.lastrowid
